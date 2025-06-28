@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fake-shop-db
+spec:
+  selector:
+    matchLabels:
+      app: fake-shop-db
+  template:
+    metadata:
+      labels:
+        app: fake-shop-db
+    spec:
+      containers:
+      - name: fake-shop-db
+        image: postgres:17.5-alpine3.22
+        env:
+          - name: POSTGRES_DB
+            value: "fakeshopdb"
+          - name: POSTGRES_USER
+            value: "fakeshop"
+          - name: POSTGRES_PASSWORD
+            value: "fakeshopdbpassword"
+        ports:
+        - containerPort: 5432
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fake-shop-db-service
+spec:
+  selector:
+    app: fake-shop-db
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fake-shop-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fake-shop-app
+  template:
+    metadata:
+      labels:
+        app: fake-shop-app
+    spec:
+      containers:
+      - name: fake-shop-app
+        image: rukasu/fake-shop:alpha
+        env:
+          - name: DB_NAME
+            value: "fakeshopdb"
+          - name: DB_USER
+            value: "fakeshop"
+          - name: DB_PASSWORD
+            value: "fakeshopdbpassword"
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_HOST
+            value: fake-shop-db-service
+        ports:
+        - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fake-shop-app-service
+spec:
+  selector:
+    app: fake-shop-app
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 5000
+    nodePort: 30000
+    protocol: TCP
