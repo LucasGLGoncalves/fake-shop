@@ -1,0 +1,39 @@
+services:
+  fake-shop-db:
+    image: postgres:17.5-alpine3.22
+    container_name: fake-shop-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: fakeshopdb
+      POSTGRES_USER: fakeshop
+      POSTGRES_PASSWORD: fakeshoppassword
+    volumes:
+      - "fake-shop-volume:/var/lib/postgresql/data"
+    networks:
+      - fake-shop-networks
+
+  fake-shop-app:
+    image: rukasu/fake-shop:alpha
+    container_name: fake-shop-app
+    depends_on:
+      - fake-shop-db
+    ports:
+      - "5000:5000"
+    environment:
+      DB_NAME: fakeshopdb
+      DB_PORT: 5432
+      DB_HOST: fake-shop-db
+      DB_USER: fakeshop
+      DB_PASSWORD: fakeshoppassword
+    networks:
+      - fake-shop-networks
+
+volumes:
+  fake-shop-volume:
+    name: fake-shop-volume
+
+networks:
+  fake-shop-networks:
+    name: fake-shop-networks
+    driver: bridge
