@@ -1,0 +1,27 @@
+name: Main-Update
+on:
+  #push:
+   # branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+
+      - name: Docker Hub Login
+
+      - name: Docker Build & Push
+
+      - name: Docker Logout
+  
+  CD:
+    needs: [CI]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+
+      - name: K8S kubeconfig access
+
+      - name: K8S deployment
